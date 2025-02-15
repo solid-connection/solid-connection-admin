@@ -12,6 +12,7 @@ export default tseslint.config(
       js.configs.recommended,
       ...tseslint.configs.recommendedTypeChecked, // u can use 'tseslint.configs.recommended' or 'tseslint.configs.strictTypeChecked' instead
       ...tseslint.configs.stylisticTypeChecked,
+      "prettier", // TODO: 이런식의 설정이 제대로 작동하는지 체크하기
     ],
     files: ["**/*.{ts,tsx}"],
     languageOptions: {
@@ -36,5 +37,5 @@ export default tseslint.config(
         { allowConstantExport: true },
       ],
     },
-  }
+  },
 );
