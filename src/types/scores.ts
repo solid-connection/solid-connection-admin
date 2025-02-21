@@ -10,6 +10,11 @@ export interface GpaResponse {
   gpaReportUrl: string;
 }
 
+export interface GpaScore {
+  verifyStatus: VerifyStatus;
+  rejectedReason?: string;
+}
+
 export interface GpaScoreStatusResponse {
   id: number;
   gpaResponse: GpaResponse;
@@ -46,9 +51,20 @@ export interface LanguageResponse {
   languageReportUrl: string;
 }
 
-export interface LanguageScoreStatusResponse {
+export interface LanguageTestResponse {
+  languageTestType: string;
+  languageTestScore: string;
+  languageTestReportUrl: string;
+}
+
+export interface LanguageTestScore {
+  verifyStatus: VerifyStatus;
+  rejectedReason?: string;
+}
+
+export interface LanguageTestScoreStatusResponse {
   id: number;
-  languageResponse: LanguageResponse;
+  languageTestResponse: LanguageTestResponse;
   verifyStatus: VerifyStatus;
   rejectedReason: string | null;
   createdAt: string;
@@ -60,17 +76,18 @@ export interface LanguageScoreWithUser {
   siteUserResponse: SiteUserResponse;
 }
 
-export interface LanguageTestResponse {
-  languageTestType: string;
-  languageTestScore: string;
-  languageTestReportUrl: string;
+export type LanguageTestType = "TOEIC" | "TOEFL" | "TEPS" | "IELTS";
+
+export interface GpaScoreUpdateRequest {
+  gpa: number;
+  gpaCriteria: number;
+  verifyStatus: VerifyStatus;
+  rejectedReason?: string;
 }
 
-export interface LanguageTestScoreStatusResponse {
-  id: number;
-  languageTestResponse: LanguageTestResponse;
+export interface LanguageTestScoreUpdateRequest {
+  languageTestType: LanguageTestType;
+  languageTestScore: string;
   verifyStatus: VerifyStatus;
-  rejectedReason: string | null;
-  createdAt: string;
-  updatedAt: string;
+  rejectedReason?: string;
 }

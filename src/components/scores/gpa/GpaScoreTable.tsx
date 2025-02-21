@@ -3,6 +3,7 @@ import { scoreApi } from "@/api/scores";
 import type { GpaScoreWithUser, VerifyStatus } from "@/types/scores";
 import { ScoreVerifyButton } from "../ScoreVerifyButton";
 import { format } from "date-fns";
+import { toast } from "sonner";
 
 interface Props {
   verifyFilter: VerifyStatus;
@@ -40,13 +41,12 @@ export function GpaScoreTable({ verifyFilter }: Props) {
     reason?: string,
   ) => {
     try {
-      await scoreApi.updateGpaScore(id, {
-        verifyStatus: status,
-        rejectedReason: reason,
-      });
+      const score = scores.find((s) => s.gpaScoreStatusResponse.id === id);
+      await scoreApi.updateGpaScore(id, status, reason, score);
       fetchScores();
     } catch (error) {
       console.error("Failed to update GPA score:", error);
+      toast.error("성적 상태 업데이트에 실패했습니다");
     }
   };
 

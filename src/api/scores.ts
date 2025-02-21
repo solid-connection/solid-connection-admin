@@ -1,73 +1,68 @@
 import type {
-  GpaScore,
-  LanguageTestScore,
-  ScoreSearchCondition,
+  GpaScoreWithUser,
+  LanguageScoreWithUser,
   PageResponse,
-} from "../types/scores";
+  ScoreSearchCondition,
+  GpaScoreUpdateRequest,
+  LanguageTestScoreUpdateRequest,
+  VerifyStatus,
+  LanguageTestType,
+} from "@/types/scores";
 import { axiosInstance } from "@/utils/axiosInstance";
-
-const BASE_URL = "/admin/scores";
 
 export const scoreApi = {
   // GPA 성적 조회
-  getGpaScores: async (
+  getGpaScores: (
     condition: ScoreSearchCondition,
-    page: number = 1,
-    size: number = 10,
-  ) => {
-    const response = await axiosInstance.get<PageResponse<GpaScore>>(
-      `${BASE_URL}/gpas`,
-      {
-        params: {
-          ...condition,
-          page,
-          size,
-        },
-      },
-    );
-    return response.data;
-  },
+    page: number,
+  ): Promise<PageResponse<GpaScoreWithUser>> =>
+    axiosInstance
+      .get("/admin/scores/gpas", { params: { ...condition, page } })
+      .then((res) => res.data),
 
   // GPA 성적 수정
-  updateGpaScore: async (
+  updateGpaScore: (
     id: number,
-    data: { verifyStatus: string; rejectedReason?: string },
+    status: VerifyStatus,
+    reason?: string,
+    score?: GpaScoreWithUser,
   ) => {
-    const response = await axiosInstance.put<GpaScore>(
-      `${BASE_URL}/gpas/${id}`,
-      data,
-    );
-    return response.data;
+    if (!score) throw new Error("Score data is required");
+    const request: GpaScoreUpdateRequest = {
+      gpa: score.gpaScoreStatusResponse.gpaResponse.gpa,
+      gpaCriteria: score.gpaScoreStatusResponse.gpaResponse.gpaCriteria,
+      verifyStatus: status,
+      rejectedReason: reason,
+    };
+    return axiosInstance.put(`/admin/scores/gpas/${id}`, request);
   },
 
   // 어학성적 조회
-  getLanguageScores: async (
+  getLanguageScores: (
     condition: ScoreSearchCondition,
-    page: number = 1,
-    size: number = 10,
-  ) => {
-    const response = await axiosInstance.get<PageResponse<LanguageTestScore>>(
-      `${BASE_URL}/language-tests`,
-      {
-        params: {
-          ...condition,
-          page,
-          size,
-        },
-      },
-    );
-    return response.data;
-  },
+    page: number,
+  ): Promise<PageResponse<LanguageScoreWithUser>> =>
+    axiosInstance
+      .get("/admin/scores/language-tests", { params: { ...condition, page } })
+      .then((res) => res.data),
 
   // 어학성적 수정
-  updateLanguageScore: async (
+  updateLanguageScore: (
     id: number,
-    data: { verifyStatus: string; rejectedReason?: string },
+    status: VerifyStatus,
+    reason?: string,
+    score?: LanguageScoreWithUser,
   ) => {
-    const response = await axiosInstance.put<LanguageTestScore>(
-      `${BASE_URL}/language-tests/${id}`,
-      data,
-    );
-    return response.data;
+    if (!score) throw new Error("Score data is required");
+    const request: LanguageTestScoreUpdateRequest = {
+      languageTestType: score.languageTestScoreStatusResponse
+        .languageTestResponse.languageTestType as LanguageTestType,
+      languageTestScore:
+        score.languageTestScoreStatusResponse.languageTestResponse
+          .languageTestScore,
+      verifyStatus: status,
+      rejectedReason: reason,
+    };
+    return axiosInstance.put(`/admin/scores/languages/${id}`, request);
   },
 };
