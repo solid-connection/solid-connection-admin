@@ -6,7 +6,7 @@ export const adminSignInApi = (
   email: string,
   password: string,
 ): Promise<AxiosResponse<AdminSignInResponse>> =>
-  publicAxiosInstance.post("/admin/auth/sign-in", { email, password });
+  publicAxiosInstance.post("/auth/email/sign-in", { email, password });
 
 export const reissueAccessTokenApi = (
   refreshToken: string,

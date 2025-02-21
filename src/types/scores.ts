@@ -2,29 +2,75 @@ export type VerifyStatus = "PENDING" | "APPROVED" | "REJECTED";
 
 export interface ScoreSearchCondition {
   verifyStatus?: VerifyStatus;
-  // 추가 검색 조건이 있다면 여기에 추가
 }
 
-export interface GpaScore {
-  id: number;
+export interface GpaResponse {
   gpa: number;
   gpaCriteria: number;
-  verifyStatus: VerifyStatus;
-  rejectedReason?: string;
+  gpaReportUrl: string;
 }
 
-export interface LanguageTestScore {
+export interface GpaScoreStatusResponse {
   id: number;
-  languageTestType: string;
-  languageTestScore: string;
+  gpaResponse: GpaResponse;
   verifyStatus: VerifyStatus;
-  rejectedReason?: string;
+  rejectedReason: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface SiteUserResponse {
+  id: number;
+  nickname: string;
+  profileImageUrl: string;
+}
+
+export interface GpaScoreWithUser {
+  gpaScoreStatusResponse: GpaScoreStatusResponse;
+  siteUserResponse: SiteUserResponse;
 }
 
 export interface PageResponse<T> {
   content: T[];
+  pageNumber: number;
+  pageSize: number;
   totalElements: number;
   totalPages: number;
-  size: number;
-  number: number;
+}
+
+export interface LanguageResponse {
+  languageType: string;
+  score: number;
+  testDate: string;
+  expireDate: string;
+  languageReportUrl: string;
+}
+
+export interface LanguageScoreStatusResponse {
+  id: number;
+  languageResponse: LanguageResponse;
+  verifyStatus: VerifyStatus;
+  rejectedReason: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface LanguageScoreWithUser {
+  languageTestScoreStatusResponse: LanguageTestScoreStatusResponse;
+  siteUserResponse: SiteUserResponse;
+}
+
+export interface LanguageTestResponse {
+  languageTestType: string;
+  languageTestScore: string;
+  languageTestReportUrl: string;
+}
+
+export interface LanguageTestScoreStatusResponse {
+  id: number;
+  languageTestResponse: LanguageTestResponse;
+  verifyStatus: VerifyStatus;
+  rejectedReason: string | null;
+  createdAt: string;
+  updatedAt: string;
 }

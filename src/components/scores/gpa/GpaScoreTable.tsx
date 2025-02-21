@@ -1,14 +1,17 @@
 import { useEffect, useState } from "react";
 import { scoreApi } from "@/api/scores";
-import type { GpaScore, VerifyStatus } from "@/types/scores";
+import type { GpaScoreWithUser, VerifyStatus } from "@/types/scores";
 import { ScoreVerifyButton } from "../ScoreVerifyButton";
+import { format } from "date-fns";
 
 interface Props {
   verifyFilter: VerifyStatus;
 }
 
+const S3_BASE_URL = import.meta.env.VITE_S3_BASE_URL;
+
 export function GpaScoreTable({ verifyFilter }: Props) {
-  const [scores, setScores] = useState<GpaScore[]>([]);
+  const [scores, setScores] = useState<GpaScoreWithUser[]>([]);
   const [page] = useState(1);
   const [loading, setLoading] = useState(false);
 
@@ -41,7 +44,7 @@ export function GpaScoreTable({ verifyFilter }: Props) {
         verifyStatus: status,
         rejectedReason: reason,
       });
-      fetchScores(); // 데이터 새로고침
+      fetchScores();
     } catch (error) {
       console.error("Failed to update GPA score:", error);
     }
@@ -58,6 +61,9 @@ export function GpaScoreTable({ verifyFilter }: Props) {
               ID
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+              닉네임
+            </th>
+            <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
               GPA
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
@@ -67,7 +73,13 @@ export function GpaScoreTable({ verifyFilter }: Props) {
               상태
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+              제출일
+            </th>
+            <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
               거절사유
+            </th>
+            <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+              인증파일
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
               작업
@@ -76,23 +88,57 @@ export function GpaScoreTable({ verifyFilter }: Props) {
         </thead>
         <tbody className="divide-y divide-gray-200 bg-white">
           {scores.map((score) => (
-            <tr key={score.id}>
-              <td className="whitespace-nowrap px-6 py-4">{score.id}</td>
-              <td className="whitespace-nowrap px-6 py-4">{score.gpa}</td>
+            <tr key={score.gpaScoreStatusResponse.id}>
               <td className="whitespace-nowrap px-6 py-4">
-                {score.gpaCriteria}
+                {score.gpaScoreStatusResponse.id}
               </td>
               <td className="whitespace-nowrap px-6 py-4">
-                {score.verifyStatus}
+                <div className="flex items-center">
+                  <img
+                    src={score.siteUserResponse.profileImageUrl}
+                    alt="프로필"
+                    className="mr-2 h-8 w-8 rounded-full"
+                  />
+                  {score.siteUserResponse.nickname}
+                </div>
               </td>
               <td className="whitespace-nowrap px-6 py-4">
-                {score.rejectedReason || "-"}
+                {score.gpaScoreStatusResponse.gpaResponse.gpa}
+              </td>
+              <td className="whitespace-nowrap px-6 py-4">
+                {score.gpaScoreStatusResponse.gpaResponse.gpaCriteria}
+              </td>
+              <td className="whitespace-nowrap px-6 py-4">
+                {score.gpaScoreStatusResponse.verifyStatus}
+              </td>
+              <td className="whitespace-nowrap px-6 py-4">
+                {format(
+                  new Date(score.gpaScoreStatusResponse.createdAt),
+                  "yyyy-MM-dd HH:mm",
+                )}
+              </td>
+              <td className="whitespace-nowrap px-6 py-4">
+                {score.gpaScoreStatusResponse.rejectedReason || "-"}
+              </td>
+              <td className="whitespace-nowrap px-6 py-4">
+                <a
+                  href={`${S3_BASE_URL}${score.gpaScoreStatusResponse.gpaResponse.gpaReportUrl}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 hover:text-blue-800 hover:underline"
+                >
+                  파일 보기
+                </a>
               </td>
               <td className="whitespace-nowrap px-6 py-4">
                 <ScoreVerifyButton
-                  currentStatus={score.verifyStatus}
+                  currentStatus={score.gpaScoreStatusResponse.verifyStatus}
                   onVerifyChange={(status, reason) =>
-                    handleVerifyStatus(score.id, status, reason)
+                    handleVerifyStatus(
+                      score.gpaScoreStatusResponse.id,
+                      status,
+                      reason,
+                    )
                   }
                 />
               </td>
