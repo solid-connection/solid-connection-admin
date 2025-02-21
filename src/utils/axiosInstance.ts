@@ -12,7 +12,7 @@ import {
 const convertToBearer = (token: string) => `Bearer ${token}`;
 
 export const axiosInstance: AxiosInstance = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_SERVER_URL,
+  baseURL: import.meta.env.VITE_API_SERVER_URL,
   withCredentials: true,
 });
 
@@ -26,20 +26,19 @@ axiosInstance.interceptors.request.use(
       if (refreshToken === null || isTokenExpired(refreshToken)) {
         removeAccessToken();
         removeRefreshToken();
-        window.location.href = "/login"; // 관리자 로그인 페이지로 리다이렉트
         return config;
       }
 
-      try {
-        const res = await reissueAccessTokenApi(refreshToken);
-        accessToken = res.data.accessToken;
-        saveAccessToken(accessToken);
-      } catch (err) {
-        removeAccessToken();
-        removeRefreshToken();
-        window.location.href = "/login";
-        console.error("인증 토큰 갱신중 오류가 발생했습니다", err);
-      }
+      await reissueAccessTokenApi(refreshToken)
+        .then((res) => {
+          accessToken = res.data.accessToken;
+          saveAccessToken(accessToken);
+        })
+        .catch((err) => {
+          removeAccessToken();
+          removeRefreshToken();
+          console.error("인증 토큰 갱신중 오류가 발생했습니다", err);
+        });
     }
 
     if (accessToken !== null) {
@@ -60,7 +59,6 @@ axiosInstance.interceptors.response.use(
       if (refreshToken === null || isTokenExpired(refreshToken)) {
         removeAccessToken();
         removeRefreshToken();
-        window.location.href = "/login";
         throw newError;
       }
 
@@ -79,14 +77,14 @@ axiosInstance.interceptors.response.use(
       } catch (err) {
         removeAccessToken();
         removeRefreshToken();
-        window.location.href = "/login";
         throw Error("로그인이 필요합니다");
       }
+    } else {
+      throw newError;
     }
-    throw newError;
   },
 );
 
 export const publicAxiosInstance: AxiosInstance = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_SERVER_URL,
+  baseURL: import.meta.env.VITE_API_SERVER_URL,
 });
