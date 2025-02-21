@@ -37,9 +37,8 @@ function LoginPage() {
 
       navigate("/scores");
     } catch (err: any) {
-      toast("로그인 실패", {
+      toast.error("로그인 실패", {
         description: err.response?.data?.message || "로그인에 실패했습니다.",
-        variant: "destructive",
       });
     } finally {
       setIsLoading(false);

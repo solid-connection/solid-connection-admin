@@ -9,7 +9,7 @@ interface Props {
 
 export function GpaScoreTable({ verifyFilter }: Props) {
   const [scores, setScores] = useState<GpaScore[]>([]);
-  const [page, setPage] = useState(1);
+  const [page] = useState(1);
   const [loading, setLoading] = useState(false);
 
   const fetchScores = async () => {
