@@ -15,6 +15,9 @@ export function GpaScoreTable({ verifyFilter }: Props) {
   const [scores, setScores] = useState<GpaScoreWithUser[]>([]);
   const [page] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editingGpa, setEditingGpa] = useState<number>(0);
+  const [editingGpaCriteria, setEditingGpaCriteria] = useState<number>(0);
 
   const fetchScores = async () => {
     setLoading(true);
@@ -47,6 +50,39 @@ export function GpaScoreTable({ verifyFilter }: Props) {
     } catch (error) {
       console.error("Failed to update GPA score:", error);
       toast.error("성적 상태 업데이트에 실패했습니다");
+    }
+  };
+
+  const handleEdit = (score: GpaScoreWithUser) => {
+    setEditingId(score.gpaScoreStatusResponse.id);
+    setEditingGpa(score.gpaScoreStatusResponse.gpaResponse.gpa);
+    setEditingGpaCriteria(score.gpaScoreStatusResponse.gpaResponse.gpaCriteria);
+  };
+
+  const handleSave = async (score: GpaScoreWithUser) => {
+    try {
+      await scoreApi.updateGpaScore(
+        score.gpaScoreStatusResponse.id,
+        score.gpaScoreStatusResponse.verifyStatus,
+        score.gpaScoreStatusResponse.rejectedReason,
+        {
+          ...score,
+          gpaScoreStatusResponse: {
+            ...score.gpaScoreStatusResponse,
+            gpaResponse: {
+              ...score.gpaScoreStatusResponse.gpaResponse,
+              gpa: editingGpa,
+              gpaCriteria: editingGpaCriteria,
+            },
+          },
+        },
+      );
+      setEditingId(null);
+      fetchScores();
+      toast.success("GPA가 수정되었습니다");
+    } catch (error) {
+      console.error("Failed to update GPA:", error);
+      toast.error("GPA 수정에 실패했습니다");
     }
   };
 
@@ -103,10 +139,58 @@ export function GpaScoreTable({ verifyFilter }: Props) {
                 </div>
               </td>
               <td className="whitespace-nowrap px-6 py-4">
-                {score.gpaScoreStatusResponse.gpaResponse.gpa}
+                {editingId === score.gpaScoreStatusResponse.id ? (
+                  <div className="flex gap-2">
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={editingGpa}
+                      onChange={(e) =>
+                        setEditingGpa(parseFloat(e.target.value))
+                      }
+                      className="w-20 rounded border px-2 py-1"
+                    />
+                  </div>
+                ) : (
+                  score.gpaScoreStatusResponse.gpaResponse.gpa
+                )}
               </td>
               <td className="whitespace-nowrap px-6 py-4">
-                {score.gpaScoreStatusResponse.gpaResponse.gpaCriteria}
+                {editingId === score.gpaScoreStatusResponse.id ? (
+                  <div className="flex gap-2">
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={editingGpaCriteria}
+                      onChange={(e) =>
+                        setEditingGpaCriteria(parseFloat(e.target.value))
+                      }
+                      className="w-20 rounded border px-2 py-1"
+                    />
+                    <button
+                      onClick={() => handleSave(score)}
+                      className="rounded bg-blue-500 px-2 py-1 text-white hover:bg-blue-600"
+                    >
+                      저장
+                    </button>
+                    <button
+                      onClick={() => setEditingId(null)}
+                      className="rounded bg-gray-500 px-2 py-1 text-white hover:bg-gray-600"
+                    >
+                      취소
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex gap-2">
+                    {score.gpaScoreStatusResponse.gpaResponse.gpaCriteria}
+                    <button
+                      onClick={() => handleEdit(score)}
+                      className="rounded bg-gray-100 px-2 py-1 text-gray-600 hover:bg-gray-200"
+                    >
+                      수정
+                    </button>
+                  </div>
+                )}
               </td>
               <td className="whitespace-nowrap px-6 py-4">
                 {score.gpaScoreStatusResponse.verifyStatus}

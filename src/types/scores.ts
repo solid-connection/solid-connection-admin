@@ -76,7 +76,19 @@ export interface LanguageScoreWithUser {
   siteUserResponse: SiteUserResponse;
 }
 
-export type LanguageTestType = "TOEIC" | "TOEFL" | "TEPS" | "IELTS";
+export type LanguageTestType =
+  | "TOEIC"
+  | "TOEFL_IBT"
+  | "TOEFL_ITP"
+  | "IELTS"
+  | "JLPT"
+  | "NEW_HSK"
+  | "ETC"
+  | "DALF"
+  | "CEFR"
+  | "TCF"
+  | "TEF"
+  | "DUOLINGO";
 
 export interface GpaScoreUpdateRequest {
   gpa: number;

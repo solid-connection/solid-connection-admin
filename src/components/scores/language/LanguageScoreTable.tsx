@@ -1,6 +1,10 @@
 import { useEffect, useState } from "react";
 import { scoreApi } from "@/api/scores";
-import type { LanguageScoreWithUser, VerifyStatus } from "@/types/scores";
+import type {
+  LanguageScoreWithUser,
+  VerifyStatus,
+  LanguageTestType,
+} from "@/types/scores";
 import { ScoreVerifyButton } from "../ScoreVerifyButton";
 import { format } from "date-fns";
 import { toast } from "sonner";
@@ -11,10 +15,28 @@ interface Props {
 
 const S3_BASE_URL = import.meta.env.VITE_S3_BASE_URL;
 
+const LANGUAGE_TEST_OPTIONS: { value: LanguageTestType; label: string }[] = [
+  { value: "TOEIC", label: "TOEIC" },
+  { value: "TOEFL_IBT", label: "TOEFL IBT" },
+  { value: "TOEFL_ITP", label: "TOEFL ITP" },
+  { value: "IELTS", label: "IELTS" },
+  { value: "JLPT", label: "JLPT" },
+  { value: "NEW_HSK", label: "NEW HSK" },
+  { value: "DALF", label: "DALF" },
+  { value: "CEFR", label: "CEFR" },
+  { value: "TCF", label: "TCF" },
+  { value: "TEF", label: "TEF" },
+  { value: "DUOLINGO", label: "DUOLINGO" },
+  { value: "ETC", label: "기타" },
+];
+
 export function LanguageScoreTable({ verifyFilter }: Props) {
   const [scores, setScores] = useState<LanguageScoreWithUser[]>([]);
   const [page] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editingScore, setEditingScore] = useState<string>("");
+  const [editingType, setEditingType] = useState<LanguageTestType>("TOEIC");
 
   const fetchScores = async () => {
     setLoading(true);
@@ -49,6 +71,45 @@ export function LanguageScoreTable({ verifyFilter }: Props) {
     } catch (error) {
       console.error("Failed to update Language score:", error);
       toast.error("성적 상태 업데이트에 실패했습니다");
+    }
+  };
+
+  const handleEdit = (score: LanguageScoreWithUser) => {
+    setEditingId(score.languageTestScoreStatusResponse.id);
+    setEditingScore(
+      score.languageTestScoreStatusResponse.languageTestResponse
+        .languageTestScore,
+    );
+    setEditingType(
+      score.languageTestScoreStatusResponse.languageTestResponse
+        .languageTestType as LanguageTestType,
+    );
+  };
+
+  const handleSave = async (score: LanguageScoreWithUser) => {
+    try {
+      await scoreApi.updateLanguageScore(
+        score.languageTestScoreStatusResponse.id,
+        score.languageTestScoreStatusResponse.verifyStatus,
+        score.languageTestScoreStatusResponse.rejectedReason,
+        {
+          ...score,
+          languageTestScoreStatusResponse: {
+            ...score.languageTestScoreStatusResponse,
+            languageTestResponse: {
+              ...score.languageTestScoreStatusResponse.languageTestResponse,
+              languageTestScore: editingScore,
+              languageTestType: editingType,
+            },
+          },
+        },
+      );
+      setEditingId(null);
+      fetchScores();
+      toast.success("어학성적이 수정되었습니다");
+    } catch (error) {
+      console.error("Failed to update language score:", error);
+      toast.error("어학성적 수정에 실패했습니다");
     }
   };
 
@@ -105,16 +166,69 @@ export function LanguageScoreTable({ verifyFilter }: Props) {
                 </div>
               </td>
               <td className="whitespace-nowrap px-6 py-4">
-                {
+                {editingId === score.languageTestScoreStatusResponse.id ? (
+                  <div className="flex gap-2">
+                    <select
+                      value={editingType}
+                      onChange={(e) =>
+                        setEditingType(e.target.value as LanguageTestType)
+                      }
+                      className="rounded border px-2 py-1"
+                    >
+                      {LANGUAGE_TEST_OPTIONS.map((option) => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                ) : (
+                  LANGUAGE_TEST_OPTIONS.find(
+                    (option) =>
+                      option.value ===
+                      score.languageTestScoreStatusResponse.languageTestResponse
+                        .languageTestType,
+                  )?.label ||
                   score.languageTestScoreStatusResponse.languageTestResponse
                     .languageTestType
-                }
+                )}
               </td>
               <td className="whitespace-nowrap px-6 py-4">
-                {
-                  score.languageTestScoreStatusResponse.languageTestResponse
-                    .languageTestScore
-                }
+                {editingId === score.languageTestScoreStatusResponse.id ? (
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={editingScore}
+                      onChange={(e) => setEditingScore(e.target.value)}
+                      className="w-20 rounded border px-2 py-1"
+                    />
+                    <button
+                      onClick={() => handleSave(score)}
+                      className="rounded bg-blue-500 px-2 py-1 text-white hover:bg-blue-600"
+                    >
+                      저장
+                    </button>
+                    <button
+                      onClick={() => setEditingId(null)}
+                      className="rounded bg-gray-500 px-2 py-1 text-white hover:bg-gray-600"
+                    >
+                      취소
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex gap-2">
+                    {
+                      score.languageTestScoreStatusResponse.languageTestResponse
+                        .languageTestScore
+                    }
+                    <button
+                      onClick={() => handleEdit(score)}
+                      className="rounded bg-gray-100 px-2 py-1 text-gray-600 hover:bg-gray-200"
+                    >
+                      수정
+                    </button>
+                  </div>
+                )}
               </td>
               <td className="whitespace-nowrap px-6 py-4">
                 {score.languageTestScoreStatusResponse.verifyStatus}

@@ -63,6 +63,6 @@ export const scoreApi = {
       verifyStatus: status,
       rejectedReason: reason,
     };
-    return axiosInstance.put(`/admin/scores/languages/${id}`, request);
+    return axiosInstance.put(`/admin/scores/language-tests/${id}`, request);
   },
 };
