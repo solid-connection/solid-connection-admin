@@ -8,6 +8,15 @@ import type {
 import { ScoreVerifyButton } from "../ScoreVerifyButton";
 import { format } from "date-fns";
 import { toast } from "sonner";
+import { StatusBadge } from "../StatusBadge";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 interface Props {
   verifyFilter: VerifyStatus;
@@ -113,163 +122,170 @@ export function LanguageScoreTable({ verifyFilter }: Props) {
     }
   };
 
-  if (loading) return <div>로딩중...</div>;
-
   return (
-    <div className="overflow-x-auto">
-      <table className="min-w-full divide-y divide-gray-200">
-        <thead className="bg-gray-50">
-          <tr>
-            <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-              ID
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-              닉네임
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-              시험종류
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-              점수
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-              상태
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-              제출일
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-              거절사유
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-              인증파일
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-              작업
-            </th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-gray-200 bg-white">
-          {scores.map((score) => (
-            <tr key={score.languageTestScoreStatusResponse.id}>
-              <td className="whitespace-nowrap px-6 py-4">
-                {score.languageTestScoreStatusResponse.id}
-              </td>
-              <td className="whitespace-nowrap px-6 py-4">
-                <div className="flex items-center">
-                  <img
-                    src={score.siteUserResponse.profileImageUrl}
-                    alt="프로필"
-                    className="mr-2 h-8 w-8 rounded-full"
-                  />
-                  {score.siteUserResponse.nickname}
-                </div>
-              </td>
-              <td className="whitespace-nowrap px-6 py-4">
-                {editingId === score.languageTestScoreStatusResponse.id ? (
-                  <div className="flex gap-2">
-                    <select
-                      value={editingType}
-                      onChange={(e) =>
-                        setEditingType(e.target.value as LanguageTestType)
-                      }
-                      className="rounded border px-2 py-1"
-                    >
-                      {LANGUAGE_TEST_OPTIONS.map((option) => (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
-                        </option>
-                      ))}
-                    </select>
+    <div className="rounded-lg border bg-white shadow">
+      <div className="overflow-x-auto">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>ID</TableHead>
+              <TableHead>닉네임</TableHead>
+              <TableHead>시험종류</TableHead>
+              <TableHead>점수</TableHead>
+              <TableHead>상태</TableHead>
+              <TableHead>제출일</TableHead>
+              <TableHead>거절사유</TableHead>
+              <TableHead>인증파일</TableHead>
+              <TableHead>작업</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {loading ? (
+              <TableRow>
+                <TableCell colSpan={9} className="text-center">
+                  <div className="flex items-center justify-center">
+                    <div className="h-5 w-5 animate-spin rounded-full border-b-2 border-gray-900"></div>
+                    <span className="ml-2">로딩중...</span>
                   </div>
-                ) : (
-                  LANGUAGE_TEST_OPTIONS.find(
-                    (option) =>
-                      option.value ===
-                      score.languageTestScoreStatusResponse.languageTestResponse
-                        .languageTestType,
-                  )?.label ||
-                  score.languageTestScoreStatusResponse.languageTestResponse
-                    .languageTestType
-                )}
-              </td>
-              <td className="whitespace-nowrap px-6 py-4">
-                {editingId === score.languageTestScoreStatusResponse.id ? (
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      value={editingScore}
-                      onChange={(e) => setEditingScore(e.target.value)}
-                      className="w-20 rounded border px-2 py-1"
-                    />
-                    <button
-                      onClick={() => handleSave(score)}
-                      className="rounded bg-blue-500 px-2 py-1 text-white hover:bg-blue-600"
-                    >
-                      저장
-                    </button>
-                    <button
-                      onClick={() => setEditingId(null)}
-                      className="rounded bg-gray-500 px-2 py-1 text-white hover:bg-gray-600"
-                    >
-                      취소
-                    </button>
-                  </div>
-                ) : (
-                  <div className="flex gap-2">
-                    {
-                      score.languageTestScoreStatusResponse.languageTestResponse
-                        .languageTestScore
-                    }
-                    <button
-                      onClick={() => handleEdit(score)}
-                      className="rounded bg-gray-100 px-2 py-1 text-gray-600 hover:bg-gray-200"
-                    >
-                      수정
-                    </button>
-                  </div>
-                )}
-              </td>
-              <td className="whitespace-nowrap px-6 py-4">
-                {score.languageTestScoreStatusResponse.verifyStatus}
-              </td>
-              <td className="whitespace-nowrap px-6 py-4">
-                {format(
-                  new Date(score.languageTestScoreStatusResponse.createdAt),
-                  "yyyy-MM-dd HH:mm",
-                )}
-              </td>
-              <td className="whitespace-nowrap px-6 py-4">
-                {score.languageTestScoreStatusResponse.rejectedReason || "-"}
-              </td>
-              <td className="whitespace-nowrap px-6 py-4">
-                <a
-                  href={`${S3_BASE_URL}${score.languageTestScoreStatusResponse.languageTestResponse.languageTestReportUrl}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-600 hover:text-blue-800 hover:underline"
+                </TableCell>
+              </TableRow>
+            ) : scores.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={9} className="text-center text-gray-500">
+                  데이터가 없습니다
+                </TableCell>
+              </TableRow>
+            ) : (
+              scores.map((score) => (
+                <TableRow
+                  key={score.languageTestScoreStatusResponse.id}
+                  className="hover:bg-gray-50"
                 >
-                  파일 보기
-                </a>
-              </td>
-              <td className="whitespace-nowrap px-6 py-4">
-                <ScoreVerifyButton
-                  currentStatus={
-                    score.languageTestScoreStatusResponse.verifyStatus
-                  }
-                  onVerifyChange={(status, reason) =>
-                    handleVerifyStatus(
-                      score.languageTestScoreStatusResponse.id,
-                      status,
-                      reason,
-                    )
-                  }
-                />
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+                  <TableCell>
+                    {score.languageTestScoreStatusResponse.id}
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center">
+                      <img
+                        src={score.siteUserResponse.profileImageUrl}
+                        alt="프로필"
+                        className="mr-2 h-8 w-8 rounded-full"
+                      />
+                      {score.siteUserResponse.nickname}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    {editingId === score.languageTestScoreStatusResponse.id ? (
+                      <div className="flex gap-2">
+                        <select
+                          value={editingType}
+                          onChange={(e) =>
+                            setEditingType(e.target.value as LanguageTestType)
+                          }
+                          className="rounded border px-2 py-1"
+                        >
+                          {LANGUAGE_TEST_OPTIONS.map((option) => (
+                            <option key={option.value} value={option.value}>
+                              {option.label}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    ) : (
+                      LANGUAGE_TEST_OPTIONS.find(
+                        (option) =>
+                          option.value ===
+                          score.languageTestScoreStatusResponse
+                            .languageTestResponse.languageTestType,
+                      )?.label ||
+                      score.languageTestScoreStatusResponse.languageTestResponse
+                        .languageTestType
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    {editingId === score.languageTestScoreStatusResponse.id ? (
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={editingScore}
+                          onChange={(e) => setEditingScore(e.target.value)}
+                          className="w-20 rounded border px-2 py-1"
+                        />
+                        <button
+                          onClick={() => handleSave(score)}
+                          className="rounded bg-blue-500 px-2 py-1 text-white hover:bg-blue-600"
+                        >
+                          저장
+                        </button>
+                        <button
+                          onClick={() => setEditingId(null)}
+                          className="rounded bg-gray-500 px-2 py-1 text-white hover:bg-gray-600"
+                        >
+                          취소
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="flex gap-2">
+                        {
+                          score.languageTestScoreStatusResponse
+                            .languageTestResponse.languageTestScore
+                        }
+                        <button
+                          onClick={() => handleEdit(score)}
+                          className="rounded bg-gray-100 px-2 py-1 text-gray-600 hover:bg-gray-200"
+                        >
+                          수정
+                        </button>
+                      </div>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    <StatusBadge
+                      status={
+                        score.languageTestScoreStatusResponse.verifyStatus
+                      }
+                    />
+                  </TableCell>
+                  <TableCell>
+                    {format(
+                      new Date(score.languageTestScoreStatusResponse.createdAt),
+                      "yyyy-MM-dd HH:mm",
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    {score.languageTestScoreStatusResponse.rejectedReason ||
+                      "-"}
+                  </TableCell>
+                  <TableCell>
+                    <a
+                      href={`${S3_BASE_URL}${score.languageTestScoreStatusResponse.languageTestResponse.languageTestReportUrl}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:text-blue-800 hover:underline"
+                    >
+                      파일 보기
+                    </a>
+                  </TableCell>
+                  <TableCell>
+                    <ScoreVerifyButton
+                      currentStatus={
+                        score.languageTestScoreStatusResponse.verifyStatus
+                      }
+                      onVerifyChange={(status, reason) =>
+                        handleVerifyStatus(
+                          score.languageTestScoreStatusResponse.id,
+                          status,
+                          reason,
+                        )
+                      }
+                    />
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </div>
     </div>
   );
 }
