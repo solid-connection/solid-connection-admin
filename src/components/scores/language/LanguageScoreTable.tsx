@@ -100,7 +100,7 @@ export function LanguageScoreTable({ verifyFilter }: Props) {
       await scoreApi.updateLanguageScore(
         score.languageTestScoreStatusResponse.id,
         score.languageTestScoreStatusResponse.verifyStatus,
-        score.languageTestScoreStatusResponse.rejectedReason,
+        score.languageTestScoreStatusResponse.rejectedReason || undefined,
         {
           ...score,
           languageTestScoreStatusResponse: {

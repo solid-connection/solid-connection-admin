@@ -73,7 +73,7 @@ export function GpaScoreTable({ verifyFilter }: Props) {
       await scoreApi.updateGpaScore(
         score.gpaScoreStatusResponse.id,
         score.gpaScoreStatusResponse.verifyStatus,
-        score.gpaScoreStatusResponse.rejectedReason,
+        score.gpaScoreStatusResponse.rejectedReason || undefined,
         {
           ...score,
           gpaScoreStatusResponse: {
