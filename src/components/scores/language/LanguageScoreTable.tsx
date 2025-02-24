@@ -17,6 +17,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
 
 interface Props {
   verifyFilter: VerifyStatus;
@@ -41,7 +42,8 @@ const LANGUAGE_TEST_OPTIONS: { value: LanguageTestType; label: string }[] = [
 
 export function LanguageScoreTable({ verifyFilter }: Props) {
   const [scores, setScores] = useState<LanguageScoreWithUser[]>([]);
-  const [page] = useState(1);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editingScore, setEditingScore] = useState<string>("");
@@ -55,6 +57,7 @@ export function LanguageScoreTable({ verifyFilter }: Props) {
         page,
       );
       setScores(response.content);
+      setTotalPages(response.totalPages);
     } catch (error) {
       console.error("Failed to fetch Language scores:", error);
     } finally {
@@ -120,6 +123,11 @@ export function LanguageScoreTable({ verifyFilter }: Props) {
       console.error("Failed to update language score:", error);
       toast.error("어학성적 수정에 실패했습니다");
     }
+  };
+
+  const handlePageChange = (newPage: number) => {
+    if (newPage < 1 || newPage > totalPages) return;
+    setPage(newPage);
   };
 
   return (
@@ -211,18 +219,18 @@ export function LanguageScoreTable({ verifyFilter }: Props) {
                           onChange={(e) => setEditingScore(e.target.value)}
                           className="w-20 rounded border px-2 py-1"
                         />
-                        <button
+                        <Button
                           onClick={() => handleSave(score)}
-                          className="rounded bg-blue-500 px-2 py-1 text-white hover:bg-blue-600"
+                          variant="default"
                         >
                           저장
-                        </button>
-                        <button
+                        </Button>
+                        <Button
                           onClick={() => setEditingId(null)}
-                          className="rounded bg-gray-500 px-2 py-1 text-white hover:bg-gray-600"
+                          variant="secondary"
                         >
                           취소
-                        </button>
+                        </Button>
                       </div>
                     ) : (
                       <div className="flex gap-2">
@@ -230,12 +238,12 @@ export function LanguageScoreTable({ verifyFilter }: Props) {
                           score.languageTestScoreStatusResponse
                             .languageTestResponse.languageTestScore
                         }
-                        <button
+                        <Button
                           onClick={() => handleEdit(score)}
-                          className="rounded bg-gray-100 px-2 py-1 text-gray-600 hover:bg-gray-200"
+                          variant="secondary"
                         >
                           수정
-                        </button>
+                        </Button>
                       </div>
                     )}
                   </TableCell>
@@ -285,6 +293,31 @@ export function LanguageScoreTable({ verifyFilter }: Props) {
             )}
           </TableBody>
         </Table>
+      </div>
+      <div className="mt-4 flex items-center justify-center gap-2">
+        <Button
+          onClick={() => handlePageChange(page - 1)}
+          disabled={page === 1}
+          variant="secondary"
+        >
+          이전
+        </Button>
+        {Array.from({ length: totalPages }, (_, idx) => (
+          <Button
+            key={idx + 1}
+            onClick={() => handlePageChange(idx + 1)}
+            variant={page === idx + 1 ? "default" : "secondary"}
+          >
+            {idx + 1}
+          </Button>
+        ))}
+        <Button
+          onClick={() => handlePageChange(page + 1)}
+          disabled={page === totalPages}
+          variant="secondary"
+        >
+          다음
+        </Button>
       </div>
     </div>
   );

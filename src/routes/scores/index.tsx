@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { GpaScoreTable } from "@/components/scores/gpa/GpaScoreTable"; // 확장자 제거
-import { LanguageScoreTable } from "@/components/scores/language/LanguageScoreTable"; // 확장자 제거
+import { GpaScoreTable } from "@/components/scores/gpa/GpaScoreTable";
+import { LanguageScoreTable } from "@/components/scores/language/LanguageScoreTable";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { VerifyStatus } from "@/types/scores";
+
 export default function ScoresPage() {
   const [verifyFilter, setVerifyFilter] = useState<VerifyStatus>("PENDING");
 
